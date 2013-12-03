@@ -60,7 +60,7 @@
      * @param {Object} el
      */
     var calcHopOffset = function(){
-    	return HOP_OFFSET_RELATIVE ? $win.height()/100*parseInt(HOP_OFFSET) : parseInt(HOP_OFFSET);
+        return HOP_OFFSET_RELATIVE ? $win.height()/100*parseInt(HOP_OFFSET) : parseInt(HOP_OFFSET);
     };
 
     /**
@@ -68,7 +68,7 @@
      * @param {Object} el
      */
     var calcClipOffset = function(){
-    	return CLIP_OFFSET_RELATIVE ? $win.height()/100*parseInt(CLIP_OFFSET) : parseInt(CLIP_OFFSET);
+        return CLIP_OFFSET_RELATIVE ? $win.height()/100*parseInt(CLIP_OFFSET) : parseInt(CLIP_OFFSET);
     };
 
     /**
@@ -76,8 +76,8 @@
      * @param {Object} el
      */
     var calcOffset = function(el){
-    	var offset = $(el).offset().top - calcClipOffset();
-    	return offset > 0 ? offset : 0;
+        var offset = $(el).offset().top - calcClipOffset();
+        return offset > 0 ? offset : 0;
     };
 
     /**
@@ -87,25 +87,25 @@
      * @param {boolean} [hop]
      */
     var scrollTo = function(targetId, hop){
-    	var el = doc.getElementById(targetId);
-    	var hopOffset = calcHopOffset();
-    	// scroll to element
+        var el = doc.getElementById(targetId);
+        var hopOffset = calcHopOffset();
+        // scroll to element
         if (el){
-        	var offset = calcOffset(el);
-        	var distance = offset - $viewport.scrollTop();
-        	// do hopping only if wanted and neccessary
-        	if (hop && hopOffset < Math.abs(distance)){
-        		// respect that target might be above current visible area
-        		win.scrollTo(0, offset - (hopOffset * (distance > 0 ? 1 : -1)));
-        	}
+            var offset = calcOffset(el);
+            var distance = offset - $viewport.scrollTop();
+            // do hopping only if wanted and neccessary
+            if (hop && hopOffset < Math.abs(distance)){
+                // respect that target might be above current visible area
+                win.scrollTo(0, offset - (hopOffset * (distance > 0 ? 1 : -1)));
+            }
             $viewport.animate({
                 scrollTop: offset
             });
         // scroll to page top
         } else if (targetId == ANCHOR_PREFIX +'_top'){
-        	if (hop && hopOffset < $viewport.scrollTop()){
-        		win.scrollTo(0, hopOffset);
-        	}
+            if (hop && hopOffset < $viewport.scrollTop()){
+                win.scrollTo(0, hopOffset);
+            }
             $viewport.animate({
                 scrollTop: 0
             });
@@ -113,9 +113,11 @@
     };
 
 
-    // on init detect if location hash contains valid jump mark
+    // on init detect if location hash contains valid jump mark and sroll there on document ready
     if (win.location.hash && win.location.hash.match(new RegExp('^#'+ ANCHOR_PREFIX))){
-        scrollTo(win.location.hash.slice(1), true);
+        $(function(){
+            scrollTo(win.location.hash.slice(1), true);
+        });
     }
 
     // automatically handle all clicks on jump marks
