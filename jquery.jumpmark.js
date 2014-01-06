@@ -21,7 +21,7 @@
      * - You may add '%' to use a relative offset related to the viewport else it will be treated as pixels
      * @type {(number|string)}
      */
-    var CLIP_OFFSET = '10%';
+    var CLIP_OFFSET = '20%';
     /**
      * Is TRUE for a relative clip offset and FALSE for an absolute value
      * @type {boolean}
@@ -43,9 +43,10 @@
     /**
      * Holds the jQuery object of the scrollable container
      * Due to differences in Mozilla and Webkit this must be html & body
-     * @type {jQuery}
+     * ATTENTION! Maybe at this point of execution the DOM contains no BODY, so select it with the READY-Event later
+     * @type {(jQuery|null)}
      */
-    var $viewport = $('html, body');
+    var $viewport = null;
     /**
      * @type {jQuery}
      */
@@ -87,42 +88,45 @@
      * @param {boolean} [hop]
      */
     var scrollTo = function(targetId, hop){
-        var el = doc.getElementById(targetId);
-        var hopOffset = calcHopOffset();
-        // scroll to element
-        if (el){
-            var offset = calcOffset(el);
-            var distance = offset - $viewport.scrollTop();
-            // do hopping only if wanted and neccessary
-            if (hop && hopOffset < Math.abs(distance)){
-                // respect that target might be above current visible area
-                win.scrollTo(0, offset - (hopOffset * (distance > 0 ? 1 : -1)));
+        try {
+            targetId = targetId.match(new RegExp(ANCHOR_PREFIX +'[\\w\\d_-]+'))[0];
+            var el = doc.getElementById(targetId);
+            var hopOffset = calcHopOffset();
+            // scroll to element
+            if (el){
+                var offset = calcOffset(el);
+                var distance = offset - $viewport.scrollTop();
+                // do hopping only if wanted and necessary
+                if (hop && hopOffset < Math.abs(distance)){
+                    // respect that target might be above current visible area
+                    win.scrollTo(0, offset - (hopOffset * (distance > 0 ? 1 : -1)));
+                }
+                $viewport.animate({
+                    scrollTop: offset
+                });
+            // scroll to page top
+            } else if (targetId == ANCHOR_PREFIX +'_top'){
+                if (hop && hopOffset < $viewport.scrollTop()){
+                    win.scrollTo(0, hopOffset);
+                }
+                $viewport.animate({
+                    scrollTop: 0
+                });
             }
-            $viewport.animate({
-                scrollTop: offset
-            });
-        // scroll to page top
-        } else if (targetId == ANCHOR_PREFIX +'_top'){
-            if (hop && hopOffset < $viewport.scrollTop()){
-                win.scrollTo(0, hopOffset);
-            }
-            $viewport.animate({
-                scrollTop: 0
-            });
-        }
+        } catch (e){}
     };
 
-
-    // on init detect if location hash contains valid jump mark and sroll there on document ready
-    if (win.location.hash && win.location.hash.match(new RegExp('^#'+ ANCHOR_PREFIX))){
-        $(function(){
+    // on document ready select the viewport & if location hash contains valid jump mark and scroll there
+    $(function(){
+        $viewport = $('html, body');
+        if (win.location.hash && win.location.hash.match(new RegExp('^#'+ ANCHOR_PREFIX))){
             scrollTo(win.location.hash.slice(1), true);
-        });
-    }
+        }
+    });
 
     // automatically handle all clicks on jump marks
     $doc.on('click', 'a[href^="#'+ ANCHOR_PREFIX +'"]', function(){
-        scrollTo(this.href.match(new RegExp(ANCHOR_PREFIX +'[\\w\\d_-]+')), false);
+        scrollTo(this.hash.slice(1), false);
     });
 
 })(jQuery, window, document);
