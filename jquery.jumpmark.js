@@ -99,7 +99,7 @@
                 // do hopping only if wanted and necessary
                 if (hop && hopOffset < Math.abs(distance)){
                     // respect that target might be above current visible area
-                    win.scrollTo(0, offset - (hopOffset * (distance > 0 ? 1 : -1)));
+                    win.scrollTo(win.pageXOffset, offset - (hopOffset * (distance > 0 ? 1 : -1)));
                 }
                 $viewport.animate({
                     scrollTop: offset
@@ -107,7 +107,7 @@
             // scroll to page top
             } else if (targetId == ANCHOR_PREFIX +'_top'){
                 if (hop && hopOffset < $viewport.scrollTop()){
-                    win.scrollTo(0, hopOffset);
+                    win.scrollTo(win.pageXOffset, hopOffset);
                 }
                 $viewport.animate({
                     scrollTop: 0
