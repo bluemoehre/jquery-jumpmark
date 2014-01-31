@@ -11,7 +11,7 @@
     'use strict';
 
     /**
-     * The plugin name and data-attribute name/selector
+     * The plugin name and event namespace
      * @type {string}
      */
     var PLUGIN_NAME = 'jumpmark';
@@ -168,7 +168,7 @@
     });
 
     // automatically handle hash change by user or JavaScript
-    $win.on('hashchange', function(){
+    $win.on('hashchange.' + PLUGIN_NAME, function(){
         if (win.location.hash.match(new RegExp('^#\\!?'+ ANCHOR_PREFIX))){
             scrollTo(win.location.hash.replace(/#!?/,''), false);
         }
