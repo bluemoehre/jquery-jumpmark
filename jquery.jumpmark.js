@@ -124,15 +124,15 @@
         }
         // if there is an element with the given anchor ID calculate its offset
         // else test for special target
-        else if (typeof target === 'string' && target.indexOf('#' + opts.hashPrefix) == 0){
-            target = target.replace('#' + opts.hashPrefix, '');
-            var el = doc.getElementById(target);
-            if (el){
+        else if (typeof target === 'string'){
+            if (target.indexOf('#' + opts.hashPrefix) == 0){
+                var el = doc.getElementById(target.replace('#' + opts.hashPrefix, ''));
+                if (!el) return;
                 elOffset = calcTargetOffset(el);
             } else if (target == 'top'){
                 elOffset = 0;
             } else if (target == 'bottom'){
-                elOffset = $win.height();
+                elOffset = $doc.height();
             } else {
                 return;
             }
