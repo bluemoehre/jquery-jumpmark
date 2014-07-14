@@ -125,13 +125,13 @@
         // if there is an element with the given anchor ID calculate its offset
         // else test for special target
         else if (typeof target === 'string'){
-            if (target.indexOf('#' + opts.hashPrefix) == 0){
+            if (opts.hashPrefix && target.indexOf('#' + opts.hashPrefix) == 0){
                 var el = doc.getElementById(target.replace('#' + opts.hashPrefix, ''));
                 if (!el) return;
                 elOffset = calcTargetOffset(el);
-            } else if (target == 'top'){
+            } else if (target == '#top'){
                 elOffset = 0;
-            } else if (target == 'bottom'){
+            } else if (target == '#bottom'){
                 elOffset = $doc.height();
             } else {
                 return;
@@ -169,8 +169,8 @@
     });
 
     // automatically handle all clicks on links with hashes/jump marks
-    $doc.on('click.' + PLUGIN_NAME, 'a[href^="#' + opts.hashPrefix + '"]', function(evt){
-        if (!evt.isDefaultPrevented()){
+    $doc.on('click.' + PLUGIN_NAME, 'a', function(evt){
+        if (this.hash.indexOf('#' + opts.hashPrefix) == 0 && !evt.isDefaultPrevented()){
             evt.preventDefault();
             var stateObj = win.history.state || {};
 
