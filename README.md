@@ -12,6 +12,13 @@ To-Do
 - calculate scroll speed based upon distance
 
 
+Known Bugs
+----------
+
+- In most browsers there is a little flicker when using forward and backward animation, because popstate is not cancelable
+- IE11 forward and backward navigation is not animated
+
+
 Demo
 ----
 

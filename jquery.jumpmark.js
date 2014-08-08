@@ -125,16 +125,26 @@
         // if there is an element with the given anchor ID calculate its offset
         // else test for special target
         else if (typeof target === 'string'){
-            if (opts.hashPrefix && target.indexOf('#' + opts.hashPrefix) == 0){
-                var el = doc.getElementById(target.replace('#' + opts.hashPrefix, ''));
-                if (!el) return;
-                elOffset = calcTargetOffset(el);
-            } else if (target == '#top'){
-                elOffset = 0;
-            } else if (target == '#bottom'){
-                elOffset = $doc.height();
-            } else {
-                return;
+            if (target.substr(0,1) != '#') return;
+            // strip hash
+            target = target.substr(1);
+            if (opts.hashPrefix){
+                if (target.indexOf(opts.hashPrefix) == 0){
+                    target = target.substr(opts.hashPrefix.length);
+                    var el = doc.getElementById(target);
+                    if (el){
+                        elOffset = calcTargetOffset(el);
+                    }
+                } else {
+                    return;
+                }
+            }
+            if (!opts.hashPrefix || opts.hashPrefix && elOffset === undefined){
+                if (target == 'top'){
+                    elOffset = 0;
+                } else if (target == 'bottom'){
+                    elOffset = $doc.height();
+                }
             }
         } else {
             elOffset = calcTargetOffset(target);
@@ -177,7 +187,7 @@
             // save current state
             if (!win.location.hash){
                 stateObj[PLUGIN_NAME] = $win.scrollTop();
-                win.history.replaceState(stateObj);
+                win.history.replaceState(stateObj, null, win.location.href);
             }
 
             stateObj[PLUGIN_NAME] = this.hash;
@@ -205,7 +215,7 @@
             evt.preventDefault();
             var stateObj = {};
             stateObj[PLUGIN_NAME] = win.location.hash;
-            win.history.replaceState(stateObj);
+            win.history.replaceState(stateObj, null, win.location.href);
             scrollTo(win.location.hash, false);
         }
     });
