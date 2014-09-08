@@ -180,7 +180,7 @@
 
     // automatically handle all clicks on links with hashes/jump marks
     $doc.on('click.' + PLUGIN_NAME, 'a', function(evt){
-        if (this.hash.indexOf('#' + opts.hashPrefix) == 0 && !evt.isDefaultPrevented()){
+        if (this.hash.indexOf('#' + opts.hashPrefix) == 0 && this.href.split('#')[0] == window.location.href.split('#')[0] && !evt.isDefaultPrevented()){
             evt.preventDefault();
             var stateObj = win.history.state || {};
 
