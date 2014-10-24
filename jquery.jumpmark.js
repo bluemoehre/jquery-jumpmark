@@ -178,7 +178,7 @@
 
     // automatically handle all clicks on links with hashes/jump marks
     $doc.on('click.' + PLUGIN_NAME, 'a', function(evt){
-        if (this.hash.indexOf('#' + opts.hashPrefix) == 0 && this.href.split('#')[0] == window.location.href.split('#')[0] && !evt.isDefaultPrevented()){
+        if (this.hash.indexOf('#' + opts.hashPrefix) == 0 && this.href.split('#')[0] == window.location.href.split('#')[0] && !evt.isDefaultPrevented() && doc.getElementById(this.hash.substr(1))){
             evt.preventDefault();
             var stateObj = win.history.state || {};
 
@@ -209,7 +209,7 @@
 
     // automatically handle hash change by user or JavaScript
     $win.on('hashchange.' + PLUGIN_NAME, function(evt){
-        if (win.location.hash.indexOf('#' + opts.hashPrefix) == 0 && !ignoreHashChangeEvent){
+        if (win.location.hash.indexOf('#' + opts.hashPrefix) == 0 && !ignoreHashChangeEvent && !evt.isDefaultPrevented() && doc.getElementById(win.location.hash.substr(1))){
             evt.preventDefault();
             var stateObj = {};
             stateObj[PLUGIN_NAME] = win.location.hash;
