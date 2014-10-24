@@ -128,18 +128,16 @@
             if (target.substr(0,1) != '#') return;
             // strip hash
             target = target.substr(1);
-            if (opts.hashPrefix){
-                if (target.indexOf(opts.hashPrefix) == 0){
-                    target = target.substr(opts.hashPrefix.length);
-                    var el = doc.getElementById(target);
-                    if (el){
-                        elOffset = calcTargetOffset(el);
-                    }
-                } else {
-                    return;
+            if (!opts.hashPrefix || target.indexOf(opts.hashPrefix) == 0){
+                target = target.substr(opts.hashPrefix.length);
+                var el = doc.getElementById(target);
+                if (el){
+                    elOffset = calcTargetOffset(el);
                 }
+            } else {
+                return;
             }
-            if (!opts.hashPrefix || opts.hashPrefix && elOffset === undefined){
+            if (!opts.hashPrefix || elOffset === undefined){
                 if (target == 'top'){
                     elOffset = 0;
                 } else if (target == 'bottom'){
