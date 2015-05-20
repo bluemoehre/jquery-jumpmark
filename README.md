@@ -8,14 +8,14 @@ To-Do
 -----
 
 - add readme contents
-- fix hard bounce at page end
 - calculate scroll speed based upon distance
+- horizontal scrolling
 
 
 Known Bugs
 ----------
 
-- In most browsers there is a little flicker when using forward and backward animation, because popstate is not cancelable
+- In most browsers there is a little flicker when using forward and backward animation, because browsers scroll before events are fired
 - IE11 forward and backward navigation is not animated
 
 

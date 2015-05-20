@@ -16,15 +16,21 @@
 
     /**
      * The plugin options
-     * @type {{hashPrefix: string, clipOffset: (number|string), hopOffset: (number|string)}}
+     * @type {{actionPrefix: string, hashPrefix: string, clipOffset: (number|string), hopOffset: (number|string), disablePopstateAnim: boolean}}
      */
     var opts = {
         /**
-         * Defines a prefix which must be present for using animation by this plugin.
-         * If no prefix is given, jumping to all anchors will be animated.
-         * (This is only for the address bar and links. Please do NOT add this to your target IDs.)
+         * Defines a prefix which must be present only on links but not the targets for using animation by this plugin.
+         * This prefix is only used to detect if the current hash should be handled with this plugin.
+         * If no prefix is given some jumps maybe cannot be animated due to browser restrictions.
          */
-        hashPrefix: 'jump:',
+        actionPrefix: '!jump:',
+        /**
+         * Defines a prefix which must be present on links and targets for using animation by this plugin.
+         * This prefix behaves like a filter to detect if the current hash should be handled with this plugin.
+         * If no prefix is given (default), jumping to all anchors will be animated.
+         */
+        hashPrefix: '',
         /**
          * Defines a general offset between the target element and the viewport's top
          * - A number will be treated as pixels. You may add '%' to use a relative offset related to the viewport.
@@ -38,8 +44,28 @@
          * - A number will be treated as pixels. You may add '%' to use a relative offset related to the viewport.
          * - If this is zero no animation will happen
          */
-        hopOffset: '15%',
-        animSpeed: 750
+        hopOffset: '25%',
+        /**
+         * Animation duration in milliseconds
+         */
+        animSpeed: 750,
+        /**
+         * Disable animation for popstate events (which will cause flicker because the event is not canceable)
+         */
+        disablePopstateAnim: false
+    };
+
+    /**
+     * Easings used by this plugin
+     * @type {{easeInOutQuad: Function}}
+     */
+    var easings = {
+        easeInOutQuad: function (x, t, b, c, d) {
+            return (t/=d/2) < 1  ?  c/2*t*t + b  :  -c/2 * ((--t)*(t-2) - 1) + b;
+        },
+        easeOutQuad: function (x, t, b, c, d) {
+            return -c *(t/=d)*(t-2) + b;
+        }
     };
 
     /**
@@ -65,6 +91,15 @@
      */
     var ignoreHashChangeEvent = false;
 
+
+    /**
+     * Tests if the given hash should be handled by this plugin
+     * @param {string} hash
+     * @returns {boolean}
+     */
+    function isJumpmark(hash){
+        return (hash.indexOf('#' + opts.actionPrefix + opts.hashPrefix) == 0);
+    }
 
     /**
      * Returns TRUE for a relative clip offset and FALSE for an absolute value
@@ -104,47 +139,49 @@
      * @returns {number}
      */
     function calcTargetOffset(el){
-        var offset = $(el).offset().top - calcClipOffset();
+        var offset = Math.min($(el).offset().top - calcClipOffset(), doc.documentElement.scrollHeight - doc.documentElement.clientHeight);
         return offset > 0 ? offset : 0;
     }
 
     /**
+     * Returns the target element for a hash or NULL.
+     * @param {string} hash
+     * @returns {HTMLElement|null}
+     */
+    function getTargetElement(hash){
+        return doc.getElementById(hash.substr(1 + opts.actionPrefix.length));
+    }
+
+    /**
      * Scrolls to the given target
-     * - If doHop is true, we will skip some part of the scrolling to save some time using the opts.hopOffset
+     * Target can be a pixel offset, jumpmark hash or HTML-Element.
+     * If doHop is true, we will skip some part of the scrolling to save some time using the "opts.hopOffset".
      * @param {(number|string|HTMLElement|jQuery)} target
      * @param {boolean} [doHop]
      */
     function scrollTo(target, doHop){
+        var animEase = 'easeInOutQuad';
         var hopOffset;
         var elOffset;
         var diffOffset;
 
+        // if scroll offset
         if (typeof target === 'number'){
             elOffset = target;
         }
-        // if there is an element with the given anchor ID calculate its offset
-        // else test for special target
-        else if (typeof target === 'string'){
-            if (target.substr(0,1) != '#') return;
-            // strip hash
-            target = target.substr(1);
-            if (!opts.hashPrefix || target.indexOf(opts.hashPrefix) == 0){
-                target = target.substr(opts.hashPrefix.length);
-                var el = doc.getElementById(target);
-                if (el){
-                    elOffset = calcTargetOffset(el);
-                }
-            } else {
-                return;
+        // if there is an element with the given anchor ID calculate its offset else test for special target (top/bottom)
+        else if (typeof target === 'string' && isJumpmark(target)){
+            target = getTargetElement(target) || target.substr(('#' + opts.actionPrefix + opts.hashPrefix).length);
+            if (typeof target === 'object'){
+                elOffset = calcTargetOffset(target);
+            } else if (target === '_top'){
+                elOffset = 0;
+            } else if (target === '_bottom'){
+                elOffset = doc.documentElement.scrollHeight - doc.documentElement.clientHeight;
             }
-            if (!opts.hashPrefix || elOffset === undefined){
-                if (target == 'top'){
-                    elOffset = 0;
-                } else if (target == 'bottom'){
-                    elOffset = $doc.height();
-                }
-            }
-        } else {
+        }
+        // if HTML-Element
+        else if (typeof target === 'object') {
             elOffset = calcTargetOffset(target);
         }
 
@@ -154,40 +191,61 @@
 
             // do hopping only if wanted and necessary
             if (doHop && hopOffset < Math.abs(diffOffset)){
-                // care about the target might be above current visible page part
+                // take care about that the target might be above current visible page part
                 if (diffOffset > 0){
                     $viewport.scrollTop(elOffset - hopOffset);
                 } else {
                     $viewport.scrollTop(elOffset + hopOffset);
                 }
+                animEase = 'easeOutQuad';
             }
 
             $viewport.stop(true).animate({
                 scrollTop: elOffset
-            }, opts.animSpeed);
+            }, opts.animSpeed, animEase);
         }
+    }
+
+    // extend jQuery with our own easing functions
+    if (!$.easing.easeInOutQuad){
+        $.extend($.easing, easings);
     }
 
     // if the location hash contains valid jump mark when document is ready scroll to it
     $(function(){
         $viewport = $('html, body');
-        if (win.location.hash.indexOf('#' + opts.hashPrefix) == 0){
+        if (isJumpmark(win.location.hash)){
             scrollTo(win.location.hash, true);
         }
     });
 
     // automatically handle all clicks on links with hashes/jump marks
     $doc.on('click.' + PLUGIN_NAME, 'a', function(evt){
-        if (this.hash.indexOf('#' + opts.hashPrefix) == 0 && this.href.split('#')[0] == window.location.href.split('#')[0] && !evt.isDefaultPrevented() && doc.getElementById(this.hash.substr(1))){
+        var stateObj;
+        if (
+            // if no event listener prevented the default while event bubbled up to the document
+            !evt.isDefaultPrevented()
+            // if prefix matches
+            && isJumpmark(this.hash)
+            // if link points to same page
+            && this.href.split('#')[0] == window.location.href.split('#')[0]
+            // if target element exists
+            && (
+                getTargetElement(this.hash)
+                || this.hash.substr(-4) === '_top'
+                || this.hash.substr(-7) === '_bottom'
+            )
+        ) {
             evt.preventDefault();
-            var stateObj = win.history.state || {};
 
-            // save current state
+            // save current state if no hash is present to return to make it possible to return to here
             if (!win.location.hash){
+                stateObj = win.history.state || {};
                 stateObj[PLUGIN_NAME] = $win.scrollTop();
                 win.history.replaceState(stateObj, null, win.location.href);
             }
 
+            stateObj = {};
             stateObj[PLUGIN_NAME] = this.hash;
             win.history.pushState(stateObj, null, this.href);
             scrollTo(this.hash, false);
@@ -196,20 +254,37 @@
 
     // automatically handle history navigation
     $win.on('popstate.' + PLUGIN_NAME, function(evt){
-        if(evt.originalEvent.state && evt.originalEvent.state[PLUGIN_NAME] !== undefined){
-            // prevent native scrolling - atm no effect =/
-            evt.preventDefault();
-            scrollTo(evt.originalEvent.state[PLUGIN_NAME], false);
+        if (evt.originalEvent.state && evt.originalEvent.state[PLUGIN_NAME] !== undefined){
+            if (!opts.disablePopstateAnim) {
+                // prevent native scrolling - atm no effect =/
+                evt.preventDefault();
+
+                scrollTo(evt.originalEvent.state[PLUGIN_NAME], false);
+            }
+
+            // prevent the hashchange event which is fired right after this popstate event
             ignoreHashChangeEvent = true;
             setTimeout(function(){
                 ignoreHashChangeEvent = false;
-            }, opts.animSpeed);
+            }, 10);
         }
     });
 
     // automatically handle hash change by user or JavaScript
     $win.on('hashchange.' + PLUGIN_NAME, function(evt){
-        if (win.location.hash.indexOf('#' + opts.hashPrefix) == 0 && !ignoreHashChangeEvent && !evt.isDefaultPrevented() && doc.getElementById(win.location.hash.substr(1))){
+        if (
+            !evt.isDefaultPrevented()
+            // if event is not related to popstate
+            && !ignoreHashChangeEvent
+            // if prefix matches
+            && isJumpmark(win.location.hash)
+            // if target element exists
+            && (
+                getTargetElement(win.location.hash)
+                || win.location.hash.substr(-4) === '_top'
+                || win.location.hash.substr(-7) === '_bottom'
+            )
+        ) {
             evt.preventDefault();
             var stateObj = {};
             stateObj[PLUGIN_NAME] = win.location.hash;
@@ -230,7 +305,7 @@
         } else if (typeof arg === 'object' && arg.toString() == '[object Object]'){
             opts = $.extend(opts, arg);
         } else  {
-            $.error('parameter must be String, HTMLElement, jQuery or configuration Object');
+            $.error('Parameter must be String, HTMLElement, jQuery or configuration Object');
         }
     };
 

@@ -4,22 +4,33 @@
     <title>jquery.jumpmark.js - DEMO | BlueMöhre</title>
     <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
     <script type="text/javascript" src="jquery.jumpmark.js"></script>
+    <script>
+        $.jumpmark({actionPrefix: '!jump:', hashPrefix: ''});
+    </script>
     <style>
         body {
             margin: 0 auto 500px;
             width: 1000px;
             font-family: sans-serif;
         }
-        #step1 {
+        code {
+            padding: 2px 5px;
+            font-size: 1.2em;
+            color: #333;
+            background: #eee;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        #mark1 {
             margin-top: 500px;
         }
-        #step2 {
+        #mark2 {
             margin-top: 800px;
         }
-        #step3 {
+        #mark3 {
             margin-top: 500px;
         }
-        #step4 {
+        #mark4 {
             margin-top: 500px;
         }
     </style>
@@ -28,34 +39,34 @@
 <main>
     <h1>Welcome to the jquery.jumpmark.js demo page</h1>
     <p>This demo uses the plugin without any additional configuration. Feel free to inspect the code of this page.</p>
-    <p>Let's start with a simple <a href="#jump:step1">Link to the first chapter</a>.</p>
-    <section id="step1">
+    <p>Let's start with a simple <a href="#!jump:mark1">Link to the first chapter</a>.</p>
+    <section id="mark1">
         <h2>Installation</h2>
         <p>Just include the plugin after the jQuery file and it will run automatically on page load.</p>
-        <p>Chapter 2 will bring you further (down). Click <a href="#jump:step2">here</a>!</p>
+        <p>Chapter 2 will bring you further (down). Click <a href="#!jump:mark2">here</a>!</p>
     </section>
-    <section id="step2">
+    <section id="mark2">
         <h2>Basic usage</h2>
         <p>
-            Out of the box the plugin will handle all links and URLs containing hashes prefixed with <b>jump:</b> (e.g. <b>#jump:myID</b>).<br/>
+            Out of the box the plugin will handle all links and hashes containing the prefix <code><b>!jump:</b></code>.<br/>
             So just place some ID attributes on your pages and link them.<br/>
             The scrolling will happen when you click on a link pointing to your ID or if you append a corresponding hash to the URL (e.g. by another JavaScript).
             If you remove the prefix by configuration all links are handled by the plugin.
         </p>
-        <p><a href="#jump:step3">Go deeper inside</a></p>
+        <p><a href="#!jump:mark3">Go deeper inside</a></p>
     </section>
-    <section id="step3">
+    <section id="mark3">
         <h2>Good to know</h2>
         <p>
-            There are some special IDs <i>#jump:</i><b>top</b> and <i>#jump:</i><b>bottom</b> which will bring you to the top/bottom of the page.<br/>
+            There are some special targets <code><i>#!jump:</i><b>_top</b></code> and <code><i>#!jump:</i><b>_bottom</b></code> which will bring you to the top/bottom of the page.<br/>
             You may add that ID to your page at any place. If present it will be used instead of page's default top.
         </p>
         <p>
             Before you try, you should know you can use your browser's history to get back here - isn't that great?<br/>
-            <a href="#jump:top">Show me the insane!</a> <a href="#jump:step4">I already saw that.</a>
+            <a href="#!jump:_top">Show me the insane!</a> <a href="#!jump:mark4">I already saw that.</a>
         </p>
     </section>
-    <section id="step4">
+    <section id="mark4">
         <h2>Extended usage</h2>
         <p>
             For more information please see the readme of the git repository and also the source code.<br/>
