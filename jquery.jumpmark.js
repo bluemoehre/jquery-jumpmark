@@ -245,9 +245,11 @@
                 win.history.replaceState(stateObj, null, win.location.href);
             }
 
-            stateObj = {};
-            stateObj[PLUGIN_NAME] = this.hash;
-            win.history.pushState(stateObj, null, this.href);
+            if (window.location.hash != this.hash) {
+                stateObj = {};
+                stateObj[PLUGIN_NAME] = this.hash;
+                win.history.pushState(stateObj, null, this.href);
+            }
             scrollTo(this.hash, false);
         }
     });
