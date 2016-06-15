@@ -242,13 +242,13 @@
             if (!win.location.hash){
                 stateObj = win.history.state || {};
                 stateObj[PLUGIN_NAME] = $win.scrollTop();
-                win.history.replaceState(stateObj, null, win.location.href);
+                win.history.replaceState(stateObj, '', win.location.href);
             }
 
             if (window.location.hash != this.hash) {
                 stateObj = {};
                 stateObj[PLUGIN_NAME] = this.hash;
-                win.history.pushState(stateObj, null, this.href);
+                win.history.pushState(stateObj, '', this.href);
             }
             scrollTo(this.hash, false);
         }
@@ -258,9 +258,10 @@
     $win.on('popstate.' + PLUGIN_NAME, function(evt){
         if (evt.originalEvent && evt.originalEvent.state && evt.originalEvent.state[PLUGIN_NAME] !== undefined){
             if (!opts.disablePopstateAnim) {
-                // prevent native scrolling - atm no effect =/
+                // prevent native scrolling
                 evt.preventDefault();
-
+                win.history.scrollRestoration = 'manual';
+                
                 scrollTo(evt.originalEvent.state[PLUGIN_NAME], false);
             }
 
@@ -290,7 +291,7 @@
             evt.preventDefault();
             var stateObj = {};
             stateObj[PLUGIN_NAME] = win.location.hash;
-            win.history.replaceState(stateObj, null, win.location.href);
+            win.history.replaceState(stateObj, '', win.location.href);
             scrollTo(win.location.hash, false);
         }
     });

@@ -10,7 +10,6 @@ To-Do
 - add readme contents
 - calculate scroll speed based upon distance
 - horizontal scrolling
-- use `window.history.scrollRestoration = 'manual'` for preventing flicker on supported browsers
 
 
 Known Bugs
